@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>California Parks Week · Spring Break 2027</title>
+<style>
+  :root{
+    --bg:#f6f2ea; --card:#fffdf8; --ink:#1f2a24; --muted:#5d6a62; --line:#e2dccd;
+    --forest:#1f4d3a; --moss:#5f8a5a; --sun:#d9822b; --sky:#2f6f8f;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141a16; --card:#1c241f; --ink:#ece8dd; --muted:#a3ada5; --line:#2c3730; --forest:#7fbf93; --moss:#8fbf86; --sun:#f0a35a; --sky:#7fb8d4; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,"Iowan Old Style","Palatino Linotype",serif}
+  h1,h2,h3,.sans{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+  a{color:var(--sky)}
+  .wrap{max-width:980px;margin:0 auto;padding:0 16px}
+
+  header.hero{position:relative;color:#fff;min-height:58vh;display:flex;align-items:flex-end;
+    background:linear-gradient(135deg,#1f4d3a,#2f6f8f);overflow:hidden}
+  header.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 35%;opacity:0;transition:opacity .6s}
+  header.hero img.loaded{opacity:1}
+  header.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(10,20,15,.82),rgba(10,20,15,.1) 65%)}
+  .hero .wrap{position:relative;z-index:1;padding-bottom:34px;padding-top:80px}
+  .hero h1{margin:0 0 6px;font-size:clamp(30px,6vw,52px);line-height:1.05;letter-spacing:-.02em}
+  .hero p{margin:0;font-size:clamp(16px,2.4vw,20px);opacity:.92;max-width:640px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(6px);
+    padding:5px 12px;border-radius:999px;font:600 13px -apple-system,Segoe UI,sans-serif}
+
+  nav.days{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+  nav.days .wrap{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;scrollbar-width:none}
+  nav.days a{white-space:nowrap;text-decoration:none;color:var(--ink);font:600 13px -apple-system,Segoe UI,sans-serif;
+    padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+  nav.days a:hover{border-color:var(--forest);color:var(--forest)}
+
+  section{padding:36px 0 4px}
+  h2{font-size:26px;margin:0 0 14px;letter-spacing:-.01em}
+  .lede{color:var(--muted);margin:0 0 18px}
+
+  .glance{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .stat b{display:block;font:700 22px -apple-system,Segoe UI,sans-serif;color:var(--forest)}
+  .stat span{color:var(--muted);font-size:14px}
+
+  .day{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin:0 0 22px;scroll-margin-top:64px}
+  .photos{display:flex;gap:2px;background:var(--line)}
+  @media (max-width:560px){ .photos{flex-direction:column} }
+  figure{margin:0;position:relative;flex:1 1 0;min-width:0;min-height:160px;background:linear-gradient(135deg,#cfd9cf,#b9cbd6);overflow:hidden;cursor:zoom-in}
+  figure img{width:100%;height:auto;display:block;opacity:0;transition:opacity .5s,transform .3s}
+  figure img.loaded{opacity:1}
+  figure:hover img{transform:scale(1.015)}
+  figure figcaption{position:absolute;left:0;right:0;bottom:0;padding:18px 10px 6px;color:#fff;
+    font:12px -apple-system,Segoe UI,sans-serif;background:linear-gradient(to top,rgba(0,0,0,.65),transparent);pointer-events:none}
+  figure figcaption a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.5);pointer-events:auto}
+  figure.empty{cursor:default;min-height:120px} figure.empty figcaption{color:#2b3a33;background:none;top:50%;bottom:auto;text-align:center;transform:translateY(-50%)}
+  figure.empty figcaption a{color:#2b3a33}
+  figure:focus-visible,.mapsvg:focus-visible{outline:3px solid var(--sun);outline-offset:-3px}
+  .mapsvg{cursor:zoom-in}
+  .zoomhint{font:12px -apple-system,Segoe UI,sans-serif;color:var(--muted);margin:0 0 6px}
+
+  .stops{display:grid;gap:12px;margin-top:10px}
+  .stop{border-left:3px solid var(--moss);padding:2px 0 2px 14px}
+  .stop h4{margin:0 0 4px;font:700 16px -apple-system,Segoe UI,sans-serif}
+  .stop .meta{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
+  .stop .meta span{font:600 11px -apple-system,Segoe UI,sans-serif;background:rgba(95,138,90,.15);color:var(--forest);
+    padding:2px 9px;border-radius:999px}
+  .stop p{margin:0;font-size:15.5px}
+
+  /* lightbox */
+  .lightbox{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(8,12,10,.92);padding:48px 56px 20px}
+  .lightbox.open{display:flex}
+  .lightbox .stage{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+  .lightbox .stage img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+  .lightbox .stage .mapwrap{background:var(--card);border-radius:12px;padding:10px;width:100%;height:100%;display:flex}
+  .lightbox .stage svg{width:100%;height:100%;max-width:none;cursor:default;border:0}
+  .lightbox .cap{color:#fff;font:14px -apple-system,Segoe UI,sans-serif;margin-top:12px;text-align:center}
+  .lightbox .cap a{color:#bcd9ee}
+  .lightbox button{position:absolute;background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:999px;width:44px;height:44px;
+    font:28px/1 -apple-system,sans-serif;cursor:pointer}
+  .lightbox button:hover{background:rgba(255,255,255,.28)}
+  .lightbox .x{top:12px;right:12px} .lightbox .prev{left:8px;top:50%} .lightbox .next{right:8px;top:50%}
+  @media (max-width:560px){ .lightbox{padding:56px 8px 16px} .lightbox .prev,.lightbox .next{top:auto;bottom:10px} .lightbox .prev{left:12px} .lightbox .next{right:12px} }
+
+  .body{padding:18px 20px 20px}
+  .daytag{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .num{background:var(--forest);color:#fff;font:700 12px -apple-system,Segoe UI,sans-serif;letter-spacing:.06em;
+    text-transform:uppercase;padding:4px 10px;border-radius:999px}
+  .date{color:var(--muted);font:600 13px -apple-system,Segoe UI,sans-serif}
+  .day h3{margin:2px 0 8px;font-size:22px;letter-spacing:-.01em}
+  .day ul{margin:8px 0 0;padding-left:20px}
+  .day li{margin:4px 0}
+  .drive{display:inline-flex;gap:8px;align-items:center;margin-top:12px;background:#f2e6d3;color:#6a3f10;
+    padding:6px 12px;border-radius:10px;font:600 13px -apple-system,Segoe UI,sans-serif}
+  @media (prefers-color-scheme: dark){ .drive{background:#3a2e1f;color:#f0c690} }
+  .swap{margin-top:10px;font-size:14px;color:var(--muted);border-left:3px solid var(--sun);padding-left:10px}
+
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:15px}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font:700 12px -apple-system,Segoe UI,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:rgba(0,0,0,.02)}
+  tr:last-child td{border-bottom:0}
+  td.t{white-space:nowrap;font-weight:700;font-family:-apple-system,Segoe UI,sans-serif}
+
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .box h3{margin:0 0 8px;font-size:17px}
+  .box ul{margin:0;padding-left:20px}
+  .box li{margin:5px 0}
+
+  /* maps */
+  :root{ --mapland:#ece6d6; --mapwater:#cfe1ea; --mapgrid:rgba(31,42,36,.07); --mapcoast:#8aa8b6; }
+  @media (prefers-color-scheme: dark){ :root{ --mapland:#232c26; --mapwater:#1b3340; --mapgrid:rgba(255,255,255,.06); --mapcoast:#4d7387; } }
+  .mapbox{border-top:1px solid var(--line);background:var(--card);padding:12px 12px 4px}
+  .mapbox.top{border:1px solid var(--line);border-radius:14px;margin-top:18px;overflow:hidden}
+  .mapsvg{display:block;width:100%;height:auto;margin:0 auto;border-radius:10px;border:1px solid var(--line)}
+  .m-land{fill:var(--mapland)} .m-water{fill:var(--mapwater)} .m-grid{stroke:var(--mapgrid);stroke-width:1}
+  .m-coast{fill:none;stroke:var(--mapcoast);stroke-width:1.3}
+  .m-route{fill:none;stroke:var(--sun);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+  .m-route-closed{fill:none;stroke:var(--muted);stroke-width:3;stroke-dasharray:2 7;stroke-linecap:round}
+  .m-pin{fill:var(--forest);stroke:#fff;stroke-width:2}
+  .m-minor{fill:var(--card);stroke:var(--forest);stroke-width:2.5}
+  .m-closed{fill:var(--card);stroke:var(--muted);stroke-width:2.5;stroke-dasharray:3 3}
+  .m-air{fill:var(--sky);stroke:#fff;stroke-width:2}
+  .m-num{fill:#fff;font:700 12px -apple-system,Segoe UI,sans-serif}
+  .m-label{fill:var(--ink);font:600 13px -apple-system,Segoe UI,sans-serif;paint-order:stroke;stroke:var(--mapland);stroke-width:4;stroke-linejoin:round}
+  .m-ocean{fill:var(--mapcoast);font:italic 13px Georgia,serif;opacity:.9}
+  .m-region{fill:var(--muted);font:italic 12px Georgia,serif;letter-spacing:.04em;paint-order:stroke;stroke:var(--mapland);stroke-width:3}
+  .m-scale line{stroke:var(--ink);stroke-width:1.5} .m-scale text{fill:var(--ink);font:11px -apple-system,Segoe UI,sans-serif;paint-order:stroke;stroke:var(--mapland);stroke-width:3}
+  .m-north path{fill:var(--ink)} .m-north text{fill:var(--ink);font:700 11px -apple-system,Segoe UI,sans-serif}
+  .mapnote{margin:6px 0 8px;color:var(--muted);font:12px -apple-system,Segoe UI,sans-serif}
+  .maplegend{display:flex;flex-wrap:wrap;gap:14px;margin:8px 0 4px;color:var(--muted);font:12px -apple-system,Segoe UI,sans-serif}
+  .maplegend i{display:inline-block;vertical-align:middle;margin-right:5px}
+  .maplegend .l1{width:22px;height:0;border-top:4px solid var(--sun);border-radius:2px}
+  .maplegend .l2{width:22px;height:0;border-top:3px dotted var(--muted)}
+  .maplegend .l3{width:11px;height:11px;border-radius:50%;background:var(--forest)}
+  .maplegend .l4{width:11px;height:11px;border-radius:2px;background:var(--sky)}
+  footer{padding:30px 0 60px;color:var(--muted);font-size:13px}
+
+  .photos.one figure{display:flex;justify-content:center;background:var(--line)}
+  .photos.one figure img{width:auto;max-width:100%;max-height:480px}
+  .fam{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  .fam .box h3{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+  .fam .box h3 span{font:700 15px -apple-system,Segoe UI,sans-serif;color:var(--forest)}
+  .leg{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:8px 0 0;font-size:15px}
+  .leg dt{font:700 12px -apple-system,Segoe UI,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+  .leg dd{margin:0}
+  .small{font-size:13px;color:var(--muted);margin-top:10px}
+  .tw{overflow-x:auto}
+  .gmapbox{position:relative;width:100%;aspect-ratio:16/10;max-height:520px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--mapland)}
+  .gmap{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .maplinks{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:8px 0 6px;font:13px -apple-system,Segoe UI,sans-serif;color:var(--muted)}
+  .maplinks a{font-weight:600}
+  .maplinks span{font-size:12px}
+  .mapexpand{font:600 13px -apple-system,Segoe UI,sans-serif;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer}
+  .mapexpand:hover{border-color:var(--forest);color:var(--forest)}
+  .mapexpand:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+  .lightbox .stage iframe{width:100%;height:100%;border:0;border-radius:12px;background:#fff}
+  @media (max-width:560px){ .gmapbox{aspect-ratio:4/5} }
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Half_Dome_with_Eastern_Yosemite_Valley_(50MP).jpg?width=1280" alt="" loading="lazy" onload="this.classList.add('loaded')">
+  <div class="wrap">
+    <h1>California Parks Week</h1>
+    <p>Golden Gate to giant sequoias: Muir Woods, Yosemite, Sequoia and Kings Canyon, with the Denver cousins.</p>
+    <div class="chips">
+      <span class="chip">Wed Mar 24 – Wed Mar 31, 2027</span>
+      <span class="chip">Two families · 9 travelers</span>
+      <span class="chip">Fly into SFO · out of Fresno</span>
+      <span class="chip">~16 hrs driving</span>
+    </div>
+  </div>
+</header>
+
+<nav class="days"><div class="wrap"><a href="#overview">Overview</a><a href="#flights">Flights</a><a href="#d1">Day 1</a><a href="#d2">Day 2</a><a href="#d3">Day 3</a><a href="#d4">Day 4</a><a href="#d5">Day 5</a><a href="#d6">Day 6</a><a href="#d7">Day 7</a><a href="#d8">Day 8</a><a href="#drives">Drive times</a><a href="#spring">Spring notes</a></div></nav>
+
+<main class="wrap">
+
+<section id="overview">
+  <h2>The shape of the week</h2>
+  <p class="lede">One-way route, no backtracking: San Francisco, Marin's coast redwoods, Yosemite, then the giant sequoias of Sequoia and Kings Canyon. The dates split the difference between the two spring breaks: AAPS is off Mar 26 – Apr 2, and the Denver cousins are off Mar 20–28. The Ann Arbor kids miss Wed–Thu, Mar 24–25, and the Denver kids miss Mon–Wed, Mar 29–31.</p>
+  <div class="glance">
+    <div class="stat"><b>9 travelers</b><span>Ann Arbor (5) and Denver (4)</span></div>
+    <div class="stat"><b>~$4,200</b><span>Total airfare at late-October prices</span></div>
+    <div class="stat"><b>Both redwoods</b><span>Coast redwoods day 2, giant sequoias days 4–7</span></div>
+    <div class="stat"><b>Easter Sun</b><span>Mar 28 is a driving day; book that weekend's lodging early</span></div>
+  </div>
+  <div class="mapbox top"><div class="gmapbox" data-src="https://maps.google.com/maps?saddr=San+Francisco+International+Airport&amp;daddr=Muir+Woods+National+Monument+to:Yosemite+Valley+Visitor+Center+to:Mariposa+Grove+of+Giant+Sequoias+to:General+Sherman+Tree+to:General+Grant+Tree+to:Fresno+Yosemite+International+Airport&amp;output=embed" data-title="Whole trip: SFO to Fresno" data-link="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=San+Francisco+International+Airport&amp;destination=Fresno+Yosemite+International+Airport&amp;waypoints=Muir%20Woods%20National%20Monument%7CYosemite%20Valley%20Visitor%20Center%7CMariposa%20Grove%20of%20Giant%20Sequoias%7CGeneral%20Sherman%20Tree%7CGeneral%20Grant%20Tree"><iframe class="gmap" src="https://maps.google.com/maps?saddr=San+Francisco+International+Airport&amp;daddr=Muir+Woods+National+Monument+to:Yosemite+Valley+Visitor+Center+to:Mariposa+Grove+of+Giant+Sequoias+to:General+Sherman+Tree+to:General+Grant+Tree+to:Fresno+Yosemite+International+Airport&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Whole trip: SFO to Fresno" allowfullscreen></iframe></div><div class="maplinks"><button type="button" class="mapexpand">Expand map</button><a href="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=San+Francisco+International+Airport&amp;destination=Fresno+Yosemite+International+Airport&amp;waypoints=Muir%20Woods%20National%20Monument%7CYosemite%20Valley%20Visitor%20Center%7CMariposa%20Grove%20of%20Giant%20Sequoias%7CGeneral%20Sherman%20Tree%7CGeneral%20Grant%20Tree" target="_blank" rel="noopener">Open in Google Maps ↗</a><span>Routes are Google's suggestion; check road closures before you drive.</span></div></div>
+</section>
+
+<section id="flights">
+  <h2>Flights</h2>
+  <p class="lede">Lowest fares found on Oct 25, 2026, per person round trip (in to SFO, home from Fresno). Prices move, so check before booking.</p>
+  <div class="fam">
+    <div class="box">
+      <h3>Ann Arbor · Delta <span>$499 × 5 ≈ $2,495</span></h3>
+      <dl class="leg">
+        <dt>Out</dt><dd>Wed Mar 24 · DTW 8:25am → SFO 10:43am, nonstop</dd>
+        <dt>Home</dt><dd>Wed Mar 31 · FAT 9:45am → DTW 7:10pm, via Salt Lake City</dd>
+      </dl>
+      <p class="small">Main Basic fare. Main Classic was about $70–130 more per person and lets you pick seats together. <a href="https://www.kayak.com/flights/DTW-SFO/2027-03-24/FAT-DTW/2027-03-31/5adults?fs=airlines%3DDL&amp;sort=price_a" target="_blank" rel="noopener">See the search</a></p>
+    </div>
+    <div class="box">
+      <h3>Denver · United <span>$428 × 4 ≈ $1,712</span></h3>
+      <dl class="leg">
+        <dt>Out</dt><dd>Wed Mar 24 · DEN 9:35am → SFO 11:25am, nonstop</dd>
+        <dt>Home</dt><dd>Wed Mar 31 · FAT 9:14am → DEN 12:26pm, nonstop</dd>
+      </dl>
+      <p class="small">Basic Economy: no seat choice and no full-size carry-on. Delta from Denver connects both ways for about $448. <a href="https://www.kayak.com/flights/DEN-SFO/2027-03-24/FAT-DEN/2027-03-31/4adults?fs=airlines%3DUA&amp;sort=price_a" target="_blank" rel="noopener">See the search</a></p>
+    </div>
+  </div>
+  <p class="small">Leaving a day earlier (Tue Mar 23 → Tue Mar 30) was about $426 per person on Delta from Detroit.</p>
+</section>
+
+<section>
+  <h2>Day by day</h2>
+
+  <article class="day" id="d1">
+    <div class="photos"><figure><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Golden_Gate_Bridge_as_seen_from_Battery_East.jpg?width=960" alt="Golden Gate Bridge" loading="lazy" onload="photoLoaded(this)" onerror="this.closest('figure').classList.add('empty')"><figcaption>Golden Gate Bridge from Battery East · <a href="https://commons.wikimedia.org/wiki/File:Golden_Gate_Bridge_as_seen_from_Battery_East.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure><figure><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Aerial_view_-_Presidio-whole.jpg?width=960" alt="Presidio of San Francisco" loading="lazy" onload="photoLoaded(this)" onerror="this.closest('figure').classList.add('empty')"><figcaption>Aerial view of the Presidio · <a href="https://commons.wikimedia.org/wiki/File:Aerial_view_-_Presidio-whole.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure></div>
+    <div class="mapbox"><div class="gmapbox" data-src="https://maps.google.com/maps?saddr=San+Francisco+International+Airport&amp;daddr=Crissy+Field%2C+San+Francisco+to:Golden+Gate+Bridge+Welcome+Center&amp;output=embed" data-title="Day 1: SFO to the Presidio and Golden Gate Bridge" data-link="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=San+Francisco+International+Airport&amp;destination=Golden+Gate+Bridge+Welcome+Center&amp;waypoints=Crissy%20Field%2C%20San%20Francisco"><iframe class="gmap" src="https://maps.google.com/maps?saddr=San+Francisco+International+Airport&amp;daddr=Crissy+Field%2C+San+Francisco+to:Golden+Gate+Bridge+Welcome+Center&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Day 1: SFO to the Presidio and Golden Gate Bridge" allowfullscreen></iframe></div><div class="maplinks"><button type="button" class="mapexpand">Expand map</button><a href="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=San+Francisco+International+Airport&amp;destination=Golden+Gate+Bridge+Welcome+Center&amp;waypoints=Crissy%20Field%2C%20San%20Francisco" target="_blank" rel="noopener">Open in Google Maps ↗</a><span>Routes are Google's suggestion; check road closures before you drive.</span></div></div>
+    <div class="body">
+      <div class="daytag"><span class="num">Day 1</span><span class="date">Wed, Mar 24</span></div>
+      <h3>Arrive in San Francisco</h3>
+      <div class="stops"><div class="stop"><h4>Meet at SFO</h4><div class="meta"><span>Late morning</span><span>Two rental cars</span></div><p>Delta from Detroit lands at 10:43am and United from Denver at 11:25am, so both families can meet at the rental car center before noon. Nine people with luggage means two cars (or one 12-passenger van). Book them as one-way rentals that drop off at Fresno, and compare the one-way fees.</p></div><div class="stop"><h4>Presidio and Crissy Field</h4><div class="meta"><span>1–2 hrs</span><span>Flat, stroller-friendly</span><span>Free</span></div><p>A former army post turned national park site, with eucalyptus groves, brick barracks and big bay views. Crissy Field is its waterfront: a wide, flat promenade of roughly 1.5 miles to Fort Point, with a beach and the bridge at the far end. Good for stretching legs after a flight, and the cousins can run on the grass and sand. The Presidio Tunnel Tops park above the roadway has a play area if the kids need a longer break.</p></div><div class="stop"><h4>Golden Gate Bridge</h4><div class="meta"><span>30–60 min</span><span>Walkable, 1.7 mi span</span><span>Windy</span></div><p>You can walk onto the east-side sidewalk for a taste of the span. Fort Point (under the south end) and Battery East are the classic photo angles. Bring a layer, because wind and fog can make it much cooler than the rest of the city.</p></div><div class="stop"><h4>Settle in early</h4><div class="meta"><span>Evening</span></div><p>Stay near the Presidio or on the Marin side so tomorrow's Muir Woods start is short. Day 2 is the longest drive of the trip.</p></div></div>
+      <span class="drive">Drive: SFO to SF hotel, about 25 min</span>
+      
+    </div>
+  </article>
+  <article class="day" id="d2">
+    <div class="photos"><figure><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Muir_Woods_National_Monument_(47879029461).jpg?width=960" alt="Muir Woods" loading="lazy" onload="photoLoaded(this)" onerror="this.closest('figure').classList.add('empty')"><figcaption>Muir Woods redwoods · <a href="https://commons.wikimedia.org/wiki/File:Muir_Woods_National_Monument_(47879029461).jpg" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure><figure><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Marin-headlands-3jul2005.jpg?width=960" alt="Marin Headlands" loading="lazy" onload="photoLoaded(this)" onerror="this.closest('figure').classList.add('empty')"><figcaption>Marin Headlands · <a href="https://commons.wikimedia.org/wiki/File:Marin-headlands-3jul2005.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure></div>
+    <div class="mapbox"><div class="gmapbox" data-src="https://maps.google.com/maps?saddr=Presidio+of+San+Francisco&amp;daddr=Muir+Woods+National+Monument+to:Mariposa%2C+CA&amp;output=embed" data-title="Day 2: Muir Woods, then to Mariposa" data-link="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=Presidio+of+San+Francisco&amp;destination=Mariposa%2C+CA&amp;waypoints=Muir%20Woods%20National%20Monument"><iframe class="gmap" src="https://maps.google.com/maps?saddr=Presidio+of+San+Francisco&amp;daddr=Muir+Woods+National+Monument+to:Mariposa%2C+CA&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Day 2: Muir Woods, then to Mariposa" allowfullscreen></iframe></div><div class="maplinks"><button type="button" class="mapexpand">Expand map</button><a href="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=Presidio+of+San+Francisco&amp;destination=Mariposa%2C+CA&amp;waypoints=Muir%20Woods%20National%20Monument" target="_blank" rel="noopener">Open in Google Maps ↗</a><span>Routes are Google's suggestion; check road closures before you drive.</span></div></div>
+    <div class="body">
+      <div class="daytag"><span class="num">Day 2</span><span class="date">Thu, Mar 25</span></div>
+      <h3>Muir Woods, then east to Yosemite</h3>
+      <div class="stops"><div class="stop"><h4>Muir Woods National Monument</h4><div class="meta"><span>2–3 hrs</span><span>0.5–2.5 mi loops</span><span>Reservations required</span></div><p>Old-growth coast redwoods, some more than 250 feet tall and over 600 years old, line a flat boardwalk and gravel path along Redwood Creek. The shortest loop is about half a mile; the main-trail loop runs roughly 2 miles via Cathedral Grove. Parking or the shuttle must be reserved ahead, and cell service is poor inside, so download the reservation. A Thursday visit should be far calmer than a weekend.</p></div><div class="stop"><h4>Marin Headlands (optional)</h4><div class="meta"><span>45–60 min</span><span>Roadside views</span><span>Skip if tired</span></div><p>Cliffs and open hills at the north end of the Golden Gate. Battery Spencer is the well-known bridge view, a short walk from the road. Worth it only if the group has energy before a 4-hour drive.</p></div><div class="stop"><h4>The drive to Yosemite</h4><div class="meta"><span>~4–4.5 hrs</span><span>Muir Woods to Mariposa</span></div><p>Through the East Bay, across the Central Valley and up into the Sierra foothills to Mariposa, about an hour from the Valley. Fill up and buy snacks before the foothills. With two cars, agree on a lunch stop so you don't lose each other.</p></div></div>
+      <span class="drive">Drive: SF to Muir Woods 40 min · Muir Woods to Mariposa 4 to 4.5 hrs · about 5 hrs total</span>
+      
+    </div>
+  </article>
+  <article class="day" id="d3">
+    <div class="photos"><figure><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg?width=960" alt="Tunnel View" loading="lazy" onload="photoLoaded(this)" onerror="this.closest('figure').classList.add('empty')"><figcaption>Tunnel View, Yosemite Valley · <a href="https://commons.wikimedia.org/wiki/File:Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure><figure><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Yosemite_falls_winter_2010.JPG?width=960" alt="Yosemite Falls" loading="lazy" onload="photoLoaded(this)" onerror="this.closest('figure').classList.add('empty')"><figcaption>Yosemite Falls · <a href="https://commons.wikimedia.org/wiki/File:Yosemite_falls_winter_2010.JPG" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure></div>
+    <div class="mapbox"><div class="gmapbox" data-src="https://maps.google.com/maps?saddr=Mariposa%2C+CA&amp;daddr=Tunnel+View%2C+Yosemite+to:Bridalveil+Fall+Trailhead%2C+Yosemite+to:Lower+Yosemite+Fall+Trailhead+to:Cook%27s+Meadow%2C+Yosemite&amp;output=embed" data-title="Day 3: Yosemite Valley" data-link="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=Mariposa%2C+CA&amp;destination=Cook%27s+Meadow%2C+Yosemite&amp;waypoints=Tunnel%20View%2C%20Yosemite%7CBridalveil%20Fall%20Trailhead%2C%20Yosemite%7CLower%20Yosemite%20Fall%20Trailhead"><iframe class="gmap" src="https://maps.google.com/maps?saddr=Mariposa%2C+CA&amp;daddr=Tunnel+View%2C+Yosemite+to:Bridalveil+Fall+Trailhead%2C+Yosemite+to:Lower+Yosemite+Fall+Trailhead+to:Cook%27s+Meadow%2C+Yosemite&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Day 3: Yosemite Valley" allowfullscreen></iframe></div><div class="maplinks"><button type="button" class="mapexpand">Expand map</button><a href="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=Mariposa%2C+CA&amp;destination=Cook%27s+Meadow%2C+Yosemite&amp;waypoints=Tunnel%20View%2C%20Yosemite%7CBridalveil%20Fall%20Trailhead%2C%20Yosemite%7CLower%20Yosemite%20Fall%20Trailhead" target="_blank" rel="noopener">Open in Google Maps ↗</a><span>Routes are Google's suggestion; check road closures before you drive.</span></div></div>
+    <div class="body">
+      <div class="daytag"><span class="num">Day 3</span><span class="date">Fri, Mar 26</span></div>
+      <h3>Yosemite Valley</h3>
+      <div class="stops"><div class="stop"><h4>Tunnel View</h4><div class="meta"><span>15–30 min</span><span>Roadside, no hike</span><span>Free</span></div><p>The classic first look: El Capitan on the left, Bridalveil Fall on the right and Half Dome in the distance. It is a pullout at the east end of the Wawona Tunnel, so it works for everyone. Spring snowmelt usually makes the falls strong this time of year. Go early; it gets crowded.</p></div><div class="stop"><h4>Bridalveil Fall</h4><div class="meta"><span>~20–30 min</span><span>About 0.5 mi round trip</span><span>Easy, paved</span></div><p>A short paved walk to the base of a 620-foot fall. In spring the spray can soak you, so bring rain shells. The path can be slick or patchy with snow.</p></div><div class="stop"><h4>Lower Yosemite Fall</h4><div class="meta"><span>~30 min</span><span>About 1 mi loop</span><span>Flat, paved</span></div><p>A gentle loop to the base of the lower fall, part of the tallest waterfall in North America (2,425 feet in three stages). Late March through May is normally when it runs best.</p></div><div class="stop"><h4>Cook's Meadow and the Valley floor</h4><div class="meta"><span>30–60 min</span><span>About 1 mi</span><span>Flat</span></div><p>A flat boardwalk loop with wide views of Half Dome, Yosemite Falls and Sentinel Rock. The Yosemite Village visitor center and Ansel Adams Gallery are close by for a break or a snack.</p></div></div>
+      <span class="drive">Drive: Mariposa to the Valley about 1 hr each way · Valley stops 5 to 15 min apart</span>
+      
+    </div>
+  </article>
+  <article class="day" id="d4">
+    <div class="photos"><figure><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Grizzly_Giant_in_Yosemite_July_2023.jpg?width=960" alt="Mariposa Grove" loading="lazy" onload="photoLoaded(this)" onerror="this.closest('figure').classList.add('empty')"><figcaption>Grizzly Giant, Mariposa Grove · <a href="https://commons.wikimedia.org/wiki/File:Grizzly_Giant_in_Yosemite_July_2023.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure><figure><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Bridelveil_Falls_Yosemite.jpg?width=960" alt="Bridalveil Fall" loading="lazy" onload="photoLoaded(this)" onerror="this.closest('figure').classList.add('empty')"><figcaption>Bridalveil Fall · <a href="https://commons.wikimedia.org/wiki/File:Bridelveil_Falls_Yosemite.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure></div>
+    <div class="mapbox"><div class="gmapbox" data-src="https://maps.google.com/maps?saddr=Yosemite+Valley+Visitor+Center&amp;daddr=Mariposa+Grove+Welcome+Plaza+to:Oakhurst%2C+CA&amp;output=embed" data-title="Day 4: Yosemite Valley to Mariposa Grove and Oakhurst" data-link="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=Yosemite+Valley+Visitor+Center&amp;destination=Oakhurst%2C+CA&amp;waypoints=Mariposa%20Grove%20Welcome%20Plaza"><iframe class="gmap" src="https://maps.google.com/maps?saddr=Yosemite+Valley+Visitor+Center&amp;daddr=Mariposa+Grove+Welcome+Plaza+to:Oakhurst%2C+CA&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Day 4: Yosemite Valley to Mariposa Grove and Oakhurst" allowfullscreen></iframe></div><div class="maplinks"><button type="button" class="mapexpand">Expand map</button><a href="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=Yosemite+Valley+Visitor+Center&amp;destination=Oakhurst%2C+CA&amp;waypoints=Mariposa%20Grove%20Welcome%20Plaza" target="_blank" rel="noopener">Open in Google Maps ↗</a><span>Routes are Google's suggestion; check road closures before you drive.</span></div></div>
+    <div class="body">
+      <div class="daytag"><span class="num">Day 4</span><span class="date">Sat, Mar 27</span></div>
+      <h3>Giant sequoias at Mariposa Grove</h3>
+      <div class="stops"><div class="stop"><h4>Valley morning (flex)</h4><div class="meta"><span>2–3 hrs</span><span>Pick one</span></div><p>Whatever you missed or liked best: the paved path from Happy Isles toward the Vernal Fall footbridge (about 0.8 mi round trip to the bridge), Mirror Lake (about 2 miles round trip, mostly flat), or a ranger program. Saturday will be busier, so start early.</p></div><div class="stop"><h4>Mariposa Grove of Giant Sequoias</h4><div class="meta"><span>2–3 hrs</span><span>Up to 2+ mi each way</span><span>Access depends on snow</span></div><p>More than 500 mature giant sequoias, including the Grizzly Giant (likely 2,000+ years old) and the California Tunnel Tree, cut through in 1895. The shuttle does not start until at least April 15, so in late March plan to walk about 2 miles each way from the lower lot. Budget half a day and bring water and snacks. Snow may linger on shady trails.</p></div><div class="stop"><h4>Where to sleep</h4><div class="meta"><span>Oakhurst or Fish Camp</span></div><p>Staying south of the park cuts tomorrow's drive. Book early: this is the Saturday before Easter.</p></div></div>
+      <span class="drive">Drive: about 2.5 to 3 hrs total including the Valley round trip</span>
+      <div class="swap">Glacier Point Road is usually closed this early. Use the time in the Valley instead.</div>
+    </div>
+  </article>
+  <article class="day" id="d5">
+    <div class="photos one"><figure><img src="https://commons.wikimedia.org/wiki/Special:FilePath/General_Sherman_1469870071.jpg?width=960" alt="General Sherman Tree" loading="lazy" onload="photoLoaded(this)" onerror="this.closest('figure').classList.add('empty')"><figcaption>General Sherman Tree · <a href="https://commons.wikimedia.org/wiki/File:General_Sherman_1469870071.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure></div>
+    <div class="mapbox"><div class="gmapbox" data-src="https://maps.google.com/maps?saddr=Oakhurst%2C+CA&amp;daddr=General+Sherman+Tree+to:Wuksachi+Lodge&amp;output=embed" data-title="Day 5: Oakhurst to Giant Forest" data-link="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=Oakhurst%2C+CA&amp;destination=Wuksachi+Lodge&amp;waypoints=General%20Sherman%20Tree"><iframe class="gmap" src="https://maps.google.com/maps?saddr=Oakhurst%2C+CA&amp;daddr=General+Sherman+Tree+to:Wuksachi+Lodge&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Day 5: Oakhurst to Giant Forest" allowfullscreen></iframe></div><div class="maplinks"><button type="button" class="mapexpand">Expand map</button><a href="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=Oakhurst%2C+CA&amp;destination=Wuksachi+Lodge&amp;waypoints=General%20Sherman%20Tree" target="_blank" rel="noopener">Open in Google Maps ↗</a><span>Routes are Google's suggestion; check road closures before you drive.</span></div></div>
+    <div class="body">
+      <div class="daytag"><span class="num">Day 5</span><span class="date">Sun, Mar 28 · Easter</span></div>
+      <h3>South to Sequoia National Park</h3>
+      <div class="stops"><div class="stop"><h4>The drive south</h4><div class="meta"><span>3–3.5 hrs</span><span>Via Fresno and CA-180</span></div><p>Down Highway 41 to Fresno, then up CA-180 into Kings Canyon and south on the Generals Highway to Giant Forest. The last stretch is slow and winding. Easter Sunday means a good brunch stop in Fresno is worth booking, and some places will be closed.</p></div><div class="stop"><h4>General Sherman Tree</h4><div class="meta"><span>30–45 min</span><span>About 0.5 mi each way</span><span>Paved, some slope</span></div><p>By volume, the largest known living tree on Earth: about 275 feet tall and 36 feet across at the base. A paved trail leads down from the main lot, and the walk back up is the hard part. Late afternoon light is lovely, and the crowds thin out.</p></div><div class="stop"><h4>Check in for two nights</h4><div class="meta"><span>Wuksachi Lodge or Three Rivers</span></div><p>Wuksachi Lodge, inside the park and a few miles from Giant Forest, saves the most driving. Three Rivers, just outside the entrance, has more choice and lower prices but is about an hour each way.</p></div></div>
+      <span class="drive">Drive: Oakhurst to Giant Forest about 3 to 3.5 hrs, with the Generals Highway slow</span>
+      <div class="swap">Carry tire chains or check rental rules. Chain controls are common on the Generals Highway in March.</div>
+    </div>
+  </article>
+  <article class="day" id="d6">
+    <div class="photos one"><figure><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Moro_Rock-View_from_Potwisha.jpg?width=960" alt="Moro Rock" loading="lazy" onload="photoLoaded(this)" onerror="this.closest('figure').classList.add('empty')"><figcaption>Moro Rock · <a href="https://commons.wikimedia.org/wiki/File:Moro_Rock-View_from_Potwisha.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure></div>
+    <div class="mapbox"><div class="gmapbox" data-src="https://maps.google.com/maps?saddr=Wuksachi+Lodge&amp;daddr=General+Sherman+Tree+to:Giant+Forest+Museum+to:Moro+Rock+to:Crescent+Meadow%2C+Sequoia+National+Park&amp;output=embed" data-title="Day 6: Around Giant Forest" data-link="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=Wuksachi+Lodge&amp;destination=Crescent+Meadow%2C+Sequoia+National+Park&amp;waypoints=General%20Sherman%20Tree%7CGiant%20Forest%20Museum%7CMoro%20Rock"><iframe class="gmap" src="https://maps.google.com/maps?saddr=Wuksachi+Lodge&amp;daddr=General+Sherman+Tree+to:Giant+Forest+Museum+to:Moro+Rock+to:Crescent+Meadow%2C+Sequoia+National+Park&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Day 6: Around Giant Forest" allowfullscreen></iframe></div><div class="maplinks"><button type="button" class="mapexpand">Expand map</button><a href="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=Wuksachi+Lodge&amp;destination=Crescent+Meadow%2C+Sequoia+National+Park&amp;waypoints=General%20Sherman%20Tree%7CGiant%20Forest%20Museum%7CMoro%20Rock" target="_blank" rel="noopener">Open in Google Maps ↗</a><span>Routes are Google's suggestion; check road closures before you drive.</span></div></div>
+    <div class="body">
+      <div class="daytag"><span class="num">Day 6</span><span class="date">Mon, Mar 29</span></div>
+      <h3>A full day in Giant Forest</h3>
+      <div class="stops"><div class="stop"><h4>Congress Trail</h4><div class="meta"><span>1.5–2 hrs</span><span>About 3 mi loop</span><span>Mostly easy</span></div><p>Starting at the Sherman Tree, the Congress Trail winds through clusters of huge sequoias, including the President Tree and the McKinley Tree. Go early for quiet trails. Expect snow patches in March.</p></div><div class="stop"><h4>Giant Forest Museum and Big Trees Trail</h4><div class="meta"><span>1 hr</span><span>About 1 mi, paved</span><span>Easy</span></div><p>The museum explains how sequoias live and depend on fire, and has good exhibits for kids. Across the road, the Big Trees Trail circles Round Meadow with sequoias at its edge. Ask the rangers here about Moro Rock and road conditions.</p></div><div class="stop"><h4>Moro Rock</h4><div class="meta"><span>45 min</span><span>350+ steps, 0.5 mi round trip</span><span>Closed if icy</span></div><p>A granite dome with a railed stairway to a big view of the Great Western Divide and the foothills. The steps are steep and exposed, so only go on clear, ice-free days. Younger kids need a hand.</p></div><div class="stop"><h4>Crescent Meadow and Tunnel Log</h4><div class="meta"><span>45 min</span><span>Short walks</span></div><p>Along Crescent Meadow Road you can drive through Tunnel Log, a fallen sequoia with a car-sized opening. At the end, Crescent Meadow has a quiet loop. If the road is closed for snow, skip it or walk part of it.</p></div></div>
+      <span class="drive">Drive: short hops of 10 to 20 min around Giant Forest</span>
+      
+    </div>
+  </article>
+  <article class="day" id="d7">
+    <div class="photos"><figure><img src="https://commons.wikimedia.org/wiki/Special:FilePath/General_Grant_Tree_Area.jpg?width=960" alt="General Grant Tree" loading="lazy" onload="photoLoaded(this)" onerror="this.closest('figure').classList.add('empty')"><figcaption>General Grant Tree area · <a href="https://commons.wikimedia.org/wiki/File:General_Grant_Tree_Area.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure><figure><img src="https://commons.wikimedia.org/wiki/Special:FilePath/KingsCanyonNP.JPG?width=960" alt="Kings Canyon National Park" loading="lazy" onload="photoLoaded(this)" onerror="this.closest('figure').classList.add('empty')"><figcaption>Kings Canyon · <a href="https://commons.wikimedia.org/wiki/File:KingsCanyonNP.JPG" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure></div>
+    <div class="mapbox"><div class="gmapbox" data-src="https://maps.google.com/maps?saddr=Giant+Forest+Museum&amp;daddr=General+Grant+Tree+to:Kings+Canyon+Visitor+Center+to:Fresno+Yosemite+International+Airport&amp;output=embed" data-title="Day 7: Grant Grove, then Fresno" data-link="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=Giant+Forest+Museum&amp;destination=Fresno+Yosemite+International+Airport&amp;waypoints=General%20Grant%20Tree%7CKings%20Canyon%20Visitor%20Center"><iframe class="gmap" src="https://maps.google.com/maps?saddr=Giant+Forest+Museum&amp;daddr=General+Grant+Tree+to:Kings+Canyon+Visitor+Center+to:Fresno+Yosemite+International+Airport&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Day 7: Grant Grove, then Fresno" allowfullscreen></iframe></div><div class="maplinks"><button type="button" class="mapexpand">Expand map</button><a href="https://www.google.com/maps/dir/?api=1&amp;travelmode=driving&amp;origin=Giant+Forest+Museum&amp;destination=Fresno+Yosemite+International+Airport&amp;waypoints=General%20Grant%20Tree%7CKings%20Canyon%20Visitor%20Center" target="_blank" rel="noopener">Open in Google Maps ↗</a><span>Routes are Google's suggestion; check road closures before you drive.</span></div></div>
+    <div class="body">
+      <div class="daytag"><span class="num">Day 7</span><span class="date">Tue, Mar 30</span></div>
+      <h3>Kings Canyon: Grant Grove, then Fresno</h3>
+      <div class="stops"><div class="stop"><h4>General Grant Grove</h4><div class="meta"><span>45–60 min</span><span>About 0.3 mi loop</span><span>Paved, easy</span></div><p>The General Grant Tree is the second-largest tree in the world by volume and the Nation's Christmas Tree. The loop passes the Fallen Monarch, a hollow log you can walk through, and the Gamlin Cabin.</p></div><div class="stop"><h4>North Grove Loop</h4><div class="meta"><span>1–1.5 hrs</span><span>About 1.5 mi loop</span><span>Easy to moderate</span></div><p>A quieter walk through big sequoias with fewer people. Expect snow patches and mud, so wear waterproof shoes.</p></div><div class="stop"><h4>Panoramic Point (if open)</h4><div class="meta"><span>~1 hr</span></div><p>The road is usually closed in winter and early spring. If it's open, a short walk leads to a wide view of the Sierra crest. Check at the Kings Canyon Visitor Center.</p></div><div class="stop"><h4>Down to Fresno</h4><div class="meta"><span>1.25–1.5 hrs</span><span>Stay near the airport</span></div><p>Highway 180 drops out of the sequoias into the Central Valley. Staying in Fresno tonight makes tomorrow's morning flights easy. Fill both cars with gas before you return them.</p></div></div>
+      <span class="drive">Drive: Giant Forest to Grant Grove about 1 hr · Grant Grove to Fresno 1.25 to 1.5 hrs</span>
+      <div class="swap">Cedar Grove and the canyon road below Grant Grove are normally closed until later in spring.</div>
+    </div>
+  </article>
+  <article class="day" id="d8">
+    
+    <div class="mapbox"><div class="gmapbox" data-src="https://maps.google.com/maps?q=Fresno+Yosemite+International+Airport&amp;z=13&amp;output=embed" data-title="Day 8: Fresno Yosemite International Airport" data-link="https://www.google.com/maps/search/?api=1&amp;query=Fresno+Yosemite+International+Airport"><iframe class="gmap" src="https://maps.google.com/maps?q=Fresno+Yosemite+International+Airport&amp;z=13&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Day 8: Fresno Yosemite International Airport" allowfullscreen></iframe></div><div class="maplinks"><button type="button" class="mapexpand">Expand map</button><a href="https://www.google.com/maps/search/?api=1&amp;query=Fresno+Yosemite+International+Airport" target="_blank" rel="noopener">Open in Google Maps ↗</a><span>Routes are Google's suggestion; check road closures before you drive.</span></div></div>
+    <div class="body">
+      <div class="daytag"><span class="num">Day 8</span><span class="date">Wed, Mar 31</span></div>
+      <h3>Fly home from Fresno</h3>
+      <div class="stops"><div class="stop"><h4>Return the cars and fly</h4><div class="meta"><span>Morning</span></div><p>United to Denver leaves at 9:14am (nonstop, about 2 hrs 10 min). Delta to Detroit leaves at 9:45am and connects in Salt Lake City, landing at 7:10pm. Fresno is a small airport, but allow time to return two cars and check bags: aim to be there by about 7:30am.</p></div></div>
+      <span class="drive">Drive: Fresno hotel to FAT about 10 to 15 min</span>
+      
+    </div>
+  </article>
+</section>
+
+<section id="drives">
+  <h2>Driving times at a glance</h2>
+  <p class="lede">Approximate, without traffic. Park roads run 25 to 45 mph, so add 15 to 20 percent, and more when two cars travel together.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Day</th><th>Route</th><th>Time</th><th>Overnight</th></tr></thead>
+    <tbody>
+      <tr><td class="t">1 · Wed</td><td>SFO to San Francisco</td><td class="t">25 min</td><td>San Francisco or Marin</td></tr>
+      <tr><td class="t">2 · Thu</td><td>SF → Muir Woods → Mariposa</td><td class="t">~5 hrs</td><td>Mariposa</td></tr>
+      <tr><td class="t">3 · Fri</td><td>Mariposa ↔ Yosemite Valley</td><td class="t">~1 hr each way</td><td>Mariposa</td></tr>
+      <tr><td class="t">4 · Sat</td><td>Valley → Mariposa Grove → Oakhurst</td><td class="t">2.5–3 hrs</td><td>Oakhurst or Fish Camp</td></tr>
+      <tr><td class="t">5 · Sun</td><td>Oakhurst → Giant Forest</td><td class="t">3–3.5 hrs</td><td>Wuksachi or Three Rivers</td></tr>
+      <tr><td class="t">6 · Mon</td><td>Around Giant Forest</td><td class="t">Short hops</td><td>Wuksachi or Three Rivers</td></tr>
+      <tr><td class="t">7 · Tue</td><td>Giant Forest → Grant Grove → Fresno</td><td class="t">2.5–3 hrs</td><td>Fresno, near FAT</td></tr>
+      <tr><td class="t">8 · Wed</td><td>Hotel → Fresno airport</td><td class="t">10–15 min</td><td>Home</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="spring">
+  <h2>Late March reality check</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>Likely closed or limited</h3>
+      <ul>
+        <li>Glacier Point Road and Tioga Road (Yosemite)</li>
+        <li>Cedar Grove / Zumwalt Meadow (Kings Canyon)</li>
+        <li>Mariposa Grove shuttle (walk in from the lower lot)</li>
+        <li>Moro Rock stairs and Crescent Meadow Road if icy or snowy</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Book or check early</h3>
+      <ul>
+        <li>Muir Woods parking or shuttle reservation for 9 people</li>
+        <li>Two one-way rental cars, SFO to Fresno</li>
+        <li>Lodging for Sat–Sun, Mar 27–28 (Easter weekend)</li>
+        <li>Park entry rules, road status and chain requirements the week before</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Pack for</h3>
+      <ul>
+        <li>Layers, rain shells and warm hats for the groves</li>
+        <li>Waterproof shoes with grip</li>
+        <li>Snacks and walkie-talkies or a shared plan for two cars</li>
+        <li>Offline maps. Cell service is spotty</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Why this works in spring</h3>
+      <ul>
+        <li>Waterfalls near peak flow</li>
+        <li>Fewer crowds than summer</li>
+        <li>Cool hiking weather in the groves</li>
+        <li>One-way route avoids a 7-hour backtrack</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  School dates from the AAPS 2026–27 calendar; the Denver dates are as you described them, so confirm both. Fares from Kayak searches on Oct 25, 2026. Photos are from Wikimedia Commons under their respective free licenses. Drive times are estimates, so check park road conditions before you go.
+</div></footer>
+
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Expanded image">
+  <button class="x" aria-label="Close">&times;</button><button class="prev" aria-label="Previous">&#8249;</button><button class="next" aria-label="Next">&#8250;</button>
+  <div class="stage"></div><div class="cap"></div>
+</div>
+<script>
+function photoLoaded(i){i.classList.add("loaded");var f=i.parentNode;if(f&&i.naturalHeight){f.style.flexGrow=(i.naturalWidth/i.naturalHeight).toFixed(3);}}
+(function(){
+  document.querySelectorAll("img.loaded,figure img").forEach(function(i){if(i.complete&&i.naturalWidth&&i.closest("figure"))photoLoaded(i)});
+  var lb=document.getElementById("lightbox"),stage=lb.querySelector(".stage"),cap=lb.querySelector(".cap"),items=[],cur=0,lastFocus=null;
+  var els=Array.prototype.slice.call(document.querySelectorAll("main figure, main .gmapbox"));
+  els.forEach(function(el,idx){
+    if(el.classList.contains("gmapbox")){var bt=el.parentNode.querySelector(".mapexpand");if(bt)bt.addEventListener("click",function(){open(idx)});return;}el.setAttribute("tabindex","0");el.setAttribute("role","button");
+    if(el.tagName.toLowerCase()==="svg"){
+      var lab=el.getAttribute("aria-label")||"Map";el.setAttribute("aria-label",lab+" (click to enlarge)");
+    }else{ el.setAttribute("aria-label","Enlarge photo: "+(el.querySelector("img").alt||"")); }
+    el.addEventListener("click",function(e){if(e.target.closest("a"))return;if(el.classList.contains("empty"))return;open(idx)});
+    el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();open(idx)}});
+  });
+  function show(){
+    var el=els[cur];stage.innerHTML="";cap.innerHTML="";
+    if(el.classList.contains("gmapbox")){var fr=document.createElement("iframe");fr.src=el.dataset.src;fr.title=el.dataset.title;fr.setAttribute("allowfullscreen","");stage.appendChild(fr);cap.innerHTML="";var t=document.createElement("span");t.textContent=el.dataset.title+" · ";var a=document.createElement("a");a.href=el.dataset.link;a.target="_blank";a.rel="noopener";a.textContent="Open in Google Maps";cap.appendChild(t);cap.appendChild(a);}
+    else if(el.tagName.toLowerCase()==="svg"){
+      var w=document.createElement("div");w.className="mapwrap";var c=el.cloneNode(true);
+      c.removeAttribute("tabindex");c.removeAttribute("role");c.style.cssText="";w.appendChild(c);stage.appendChild(w);
+      cap.textContent=(el.getAttribute("aria-label")||"Map").replace(" (click to enlarge)","")+" · schematic, not for navigation";
+    }else{
+      var im=el.querySelector("img"),big=im.src.replace(/width=\d+/,"width=1920");
+      var n=document.createElement("img");n.src=big;n.alt=im.alt;stage.appendChild(n);
+      var a=el.querySelector("figcaption");cap.innerHTML=a?a.innerHTML:"";
+    }
+  }
+  function open(i){cur=i;lastFocus=document.activeElement;show();lb.classList.add("open");document.body.style.overflow="hidden";lb.querySelector(".x").focus()}
+  function close(){lb.classList.remove("open");stage.innerHTML="";document.body.style.overflow="";if(lastFocus)lastFocus.focus()}
+  function step(d){cur=(cur+d+els.length)%els.length;while(els[cur].classList.contains("empty")){cur=(cur+d+els.length)%els.length}show()}
+  lb.querySelector(".x").onclick=close;lb.querySelector(".prev").onclick=function(){step(-1)};lb.querySelector(".next").onclick=function(){step(1)};
+  lb.addEventListener("click",function(e){if(e.target===lb||e.target===stage)close()});
+  document.addEventListener("keydown",function(e){if(!lb.classList.contains("open"))return;
+    if(e.key==="Escape")close();else if(e.key==="ArrowLeft")step(-1);else if(e.key==="ArrowRight")step(1)});
+})();
+</script>
+</body>
+</html>
